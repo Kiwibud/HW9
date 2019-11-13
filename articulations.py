@@ -15,25 +15,19 @@ import urllib.request
 import bs4
 import re
 
-
+    
 def get_links(top_url):
     """
     Enter your docstring here.
     """
     # Extract list of relevant (absolute) links referenced in top_url
-    try:
-        with urllib.request.urlopen(top_url) as url_file:
-            bytes = url_file.read()
-    except urllib.error.URLError as url_err:
-        print(f'Error opening url: {top_url}\n{url_err}')
-    else:
-        soup = bs4.BeautifulSoup(bytes, 'html.parser')
-        tables = soup.find_all('table')
-        table = tables[2]
-        absolute_links = {urllib.parse.urljoin(top_url, anchor.get('href',
-                                                                   None)) for
-                          anchor in table.find_all('a')}
-        return absolute_links
+    soup = make_soup(top_url)
+    tables = soup.find_all('table')
+    table = tables[2]
+    absolute_links = {urllib.parse.urljoin(top_url, anchor.get('href',
+                                                               None)) for
+                      anchor in table.find_all('a')}
+    return absolute_links
 
 
 def extract_info(url, course_regex):
@@ -43,19 +37,13 @@ def extract_info(url, course_regex):
     # Return college and equivalent course found in the given url if any
     # with urllib.request.urlopen(url) as url_file:
     #     pass
-    visited = set()
-    info = {}
-    result = read_url(url)
-    if result is not None:
-        course_match = re.findall(course_regex, get_info(),
-                                   re.IGNORECASE)
-        college = read_url(url)
-        info = {college: course_match}
-    return info
-
-    # return c
-    # soup = bs4.BeautifulSoup(bytes,'html.parser')
-    # text = soup.get_text()ollege name: articulated courses
+    result = ''
+    soup = make_soup(url)
+    tables = soup.find_all('table')
+    # College name in table('h3')[1]
+    table = tables[2]
+    college_name = table('h3')[1].get_text()
+    print(college_name)
 
 
 def harvest(all_links, course_regex):
@@ -87,15 +75,20 @@ def report(info, course_name):
             print(new_file)
 
 
-def make_soup(filename):
+def make_soup(url):
     """
-    Parse the html file specified.
-    :param filename: string - name of the html file to be parsed
-    :return: BeautifulSoup object
+
+    :param url:
+    :return:
     """
-    with open(filename, 'r', encoding='utf-8') as html_file:
-        soup = bs4.BeautifulSoup(html_file, "html.parser")
-    return soup
+    try:
+        with urllib.request.urlopen(url) as url_file:
+            bytes = url_file.read()
+    except urllib.error.URLError as url_err:
+        print(f'Error opening url: {url}\n{url_err}')
+    else:
+        soup = bs4.BeautifulSoup(bytes, 'html.parser')
+        return soup
 
 def get_info():
     course_name = input('Please enter a course: ')
