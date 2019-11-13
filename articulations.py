@@ -10,7 +10,7 @@ Enter your docstring with a one-line overview here
 and a more detailed description here.
 """
 # The seed/tip url is declared as a constant.
-SEED = 'http://info.sjsu.edu/web-dbgen/artic/algit sl-course-to-course.html'
+SEED = 'http://info.sjsu.edu/web-dbgen/artic/all-course-to-course.html'
 import urllib.request
 import bs4
 import re
