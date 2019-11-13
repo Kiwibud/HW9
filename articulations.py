@@ -28,9 +28,11 @@ def get_links(top_url):
         print(f'Error opening url: {top_url}\n{url_err}')
     else:
         soup = bs4.BeautifulSoup(bytes, 'html.parser')
+        tables = soup.find_all('table')
+        table = tables[2]
         absolute_links = {urllib.parse.urljoin(top_url, anchor.get('href',
                                                                    None)) for
-                          anchor in soup('a')}
+                          anchor in table.find_all('a')}
         return absolute_links
 
 
