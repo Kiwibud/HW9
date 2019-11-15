@@ -3,24 +3,25 @@
 # Purpose:  Homework 9
 #
 # Author(s): Kiwibud
-#
 # ----------------------------------------------------------------------
 """
 Enter your docstring with a one-line overview here
 and a more detailed description here.
 """
-# The seed/tip url is declared as a constant.
-SEED = 'http://info.sjsu.edu/web-dbgen/artic/all-course-to-course.html'
+
 import urllib.request
 import bs4
 import re
-
+# The seed/tip url is declared as a constant.
+SEED = 'http://info.sjsu.edu/web-dbgen/artic/all-course-to-course.html'
 COURSE_ID_LEN = 4
 
 
 def get_links(top_url):
     """
-    Enter your docstring here.
+
+    :param top_url:
+    :return:
     """
     # Extract list of relevant (absolute) links referenced in top_url
     soup = make_soup(top_url)
@@ -34,7 +35,10 @@ def get_links(top_url):
 
 def extract_info(url, course_regex):
     """
-    Enter your docstring here.
+
+    :param url:
+    :param course_regex:
+    :return:
     """
     # Return college and equivalent course found in the given url if any
     soup = make_soup(url)
@@ -43,7 +47,6 @@ def extract_info(url, course_regex):
     college_name = info_table('h3')[1].get_text()
     regex = re.compile(course_regex + r'.*', re.IGNORECASE)
     sjsu_rows = info_table.find_all('td', string=regex)
-    # course_info = ''
     for each_row in sjsu_rows:
         equivalent_col = (each_row.find_next_sibling('td')) \
             .find_next_sibling('td')
@@ -65,7 +68,8 @@ def harvest(all_links, course_regex):
     for each_link in all_links:
         course_info = extract_info(each_link, course_regex)
         if course_info is not None:
-            info += course_info + '\n'
+            print(course_info)
+            info = info + f'{course_info}\n'
     return info
 
 
@@ -76,12 +80,8 @@ def report(info, course_name):
     # Write the info harvested to a text file with the name:
     # course_name.txt where course_name is the name as entered by user.
     name = '.'.join([course_name, 'txt'])
-    with open(name, 'w', encoding='utf-8') as courses_file:
-        if not info:
-            pass
-        else:
-            courses_file.write(info)
-            print(courses_file)
+    with open(name, 'w', encoding='utf-8') as new_file:
+        new_file.write(info)
 
 
 def make_soup(url):
@@ -105,22 +105,17 @@ def course_variation(course_name):
     :param course_name: name of course
     :return: Formalized course_regex to find the course info
     """
-    pattern = r'([A-Za-z]+)(\s*)(0?)(\d+)([A-Za-z]?)'
+    pattern = r'([A-Za-z]+[0-9]?)(\s*)(\d+)(\s*)([A-Za-z]?)'
     course_match = re.finditer(pattern, course_name, re.IGNORECASE)
     if not course_match:
-        print("Course name not matching pattern")
+        print("Course name does not match the pattern")
         return None
     else:
         for each_match in course_match:
             subject = each_match.group(1)
-            course_num = each_match.group(4)
+            course_num = each_match.group(3)
             course_letter = each_match.group(5)
-            if len(course_num) < 3:
-                # print('add 0')
-                return subject + r' 0' + course_num + course_letter
-            else:
-                print('no adding 0')
-                return subject + r' ' + course_num + course_letter
+            return subject + r' 0*' + course_num + course_letter
 
 
 def main():
@@ -130,12 +125,12 @@ def main():
     course_name = input('Please enter a course: ')
     # Build a regex corresponding to the course name specified
     course_regex = course_variation(course_name)
-    print(f'course_regex: {course_regex}')
+    print(f'Course regex: {course_regex}')
     # Harvest information from all the links
     info = harvest(links, course_regex)
     # Write the harvested information to the output file
     report(info, course_name)
-    print(f'Your output has been saved in the file: {course_regex}.txt')
+    print(f'Your output has been saved in the file: {course_name}.txt')
 
 
 if __name__ == "__main__":
