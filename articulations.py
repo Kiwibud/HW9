@@ -43,7 +43,6 @@ def extract_info(url, course_regex):
     college_name = info_table('h3')[1].get_text()
     regex = re.compile(course_regex + r'.*', re.IGNORECASE)
     sjsu_rows = info_table.find_all('td', string=regex)
-    course_info = 'hi'
     for each_row in sjsu_rows:
         equivalent_col = (each_row.find_next_sibling('td')) \
             .find_next_sibling('td')
@@ -66,7 +65,7 @@ def harvest(all_links, course_regex):
         course_info = extract_info(each_link, course_regex)
         if course_info is not None:
             print(course_info)
-            info = '\n'.join(course_info)
+            info = info + f'{course_info}\n'
     return info
 
 
@@ -78,11 +77,11 @@ def report(info, course_name):
     # course_name.txt where course_name is the name as entered by user.
     name = '.'.join([course_name, 'txt'])
     with open(name, 'x', encoding='utf-8') as new_file:
-        if not info:
-            pass
-        else:
-            new_file.write(info)
-            print(new_file)
+        # if not info:
+        #     pass
+        # else:
+        new_file.write(info)
+        print(new_file)
 
 
 def make_soup(url):
@@ -128,9 +127,6 @@ def course_variation(course_name):
 def main():
     # Get all the relevant links referenced from the seed SEED (top_url)
     links = get_links(SEED)
-    # for links in get_links(SEED):
-    #     print(type(links))
-    #     print(links)
     # Prompt the user for a course name
     course_name = input('Please enter a course: ')
     # Build a regex corresponding to the course name specified
