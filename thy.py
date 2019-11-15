@@ -38,19 +38,19 @@ def extract_info(url, course_regex):
     """
     # Return college and equivalent course found in the given url if any
     soup = make_soup(url)
-    breadcrumb = soup.find_all('h3')  # the id of div on the website
-    college_name = breadcrumb[2]  # need to eliminate h3 (DONT KNOW YET)
     tables = soup.find_all('table')
     info_table = tables[2]
+    college_name = info_table('h3')[1].get_text()
     regex = re.compile(course_regex + r'.*', re.IGNORECASE)
     sjsu_rows = info_table.find_all('td', string=regex)
-    course_info = 'hi'
+    # course_info = ''
     for each_row in sjsu_rows:
         equivalent_col = (each_row.find_next_sibling('td')) \
             .find_next_sibling('td')
-        course_info = equivalent_col.get_text(separator='')
+        course_info = equivalent_col.get_text(separator=' ')
         course_info = ' '.join(course_info.split())
-    return f'{college_name}: {course_info}'
+        if re.match('No', course_info) is None:
+            return f'{college_name}: {course_info}'
 
 
 def harvest(all_links, course_regex):
@@ -61,10 +61,11 @@ def harvest(all_links, course_regex):
     # all_links.
     # Join all the equivalency info into a single string (entries must
     # be separated by new line characters).
+    info = ''
     for each_link in all_links:
         course_info = extract_info(each_link, course_regex)
-        print(course_info)
-        info = '\n'.join(course_info)
+        if course_info is not None:
+            info += course_info + '\n'
     return info
 
 
@@ -75,12 +76,12 @@ def report(info, course_name):
     # Write the info harvested to a text file with the name:
     # course_name.txt where course_name is the name as entered by user.
     name = '.'.join([course_name, 'txt'])
-    with open(name, 'x', encoding='utf-8') as new_file:
+    with open(name, 'w', encoding='utf-8') as courses_file:
         if not info:
             pass
         else:
-            new_file.write(info)
-            print(new_file)
+            courses_file.write(info)
+            print(courses_file)
 
 
 def make_soup(url):
@@ -96,11 +97,6 @@ def make_soup(url):
     else:
         soup = bs4.BeautifulSoup(page, 'html.parser')
         return soup
-
-
-def get_info():
-    course_name = input('Please enter a course: ')
-    return course_name
 
 
 def course_variation(course_name):
@@ -119,7 +115,6 @@ def course_variation(course_name):
             subject = each_match.group(1)
             course_num = each_match.group(4)
             course_letter = each_match.group(5)
-            # print(f'subject: {subject}  courseID {course_num} {course_letter}')
             if len(course_num) < 3:
                 # print('add 0')
                 return subject + r' 0' + course_num + course_letter
@@ -128,53 +123,18 @@ def course_variation(course_name):
                 return subject + r' ' + course_num + course_letter
 
 
-def read_url(url):
-    try:
-        with urllib.request.urlopen(url) as url_file:
-            page = url_file.read()
-    except urllib.error.URLError as url_err:
-        print(f'Error opening url: {url}\n{url_err}')
-    else:
-        soup = bs4.BeautifulSoup(page, 'html.parser')
-        for each_style_tag in soup("style"):
-            each_style_tag.decompose()
-        for each_script_tag in soup("script"):
-            each_script_tag.decompose()
-        text = soup('h3')[2].get_text()
-        return text
-
-
-def visit_url(url):
-    pass
-
-
-def ok_to_crawl(url):
-    pass
-
-
-def crawl(seed, search_term):
-    pass
-
-
 def main():
     # Get all the relevant links referenced from the seed SEED (top_url)
     links = get_links(SEED)
-    # for links in get_links(SEED):
-    #     print(type(links))
-    #     print(links)
     # Prompt the user for a course name
-    course_name = get_info()
+    course_name = input('Please enter a course: ')
     # Build a regex corresponding to the course name specified
     course_regex = course_variation(course_name)
     print(f'course_regex: {course_regex}')
-    # crawl(SEED, course_regex)
-    # print(course_match)
-    # print(extract_info('http://info.sjsu.edu/web-dbgen/artic/SJCITY/course-to'
-    #               '-course.html', course_regex))
     # Harvest information from all the links
     info = harvest(links, course_regex)
     # Write the harvested information to the output file
-    # report(info, course_name)
+    report(info, course_name)
     print(f'Your output has been saved in the file: {course_regex}.txt')
 
 
