@@ -6,8 +6,10 @@
 #
 # ----------------------------------------------------------------------
 """
-Enter your docstring with a one-line overview here
-and a more detailed description here.
+ A program to harvest all college equivalent courses of a SJSU course
+
+ Compiles SJSU course articulation information from multiple web pages
+ Saves that information in a text file on the user's computer
 """
 # The seed/tip url is declared as a constant.
 SEED = 'http://info.sjsu.edu/web-dbgen/artic/all-course-to-course.html'
@@ -20,9 +22,10 @@ COURSE_ID_LEN = 4
 
 def get_links(top_url):
     """
-    Enter your docstring here.
+    Extract list of relevant (absolute) links referenced in top_url
+    :param top_url: (string) given url link to extract relevant links
+    :return: (list) list of links
     """
-    # Extract list of relevant (absolute) links referenced in top_url
     soup = make_soup(top_url)
     tables = soup.find_all('table')
     table = tables[2]
@@ -34,7 +37,10 @@ def get_links(top_url):
 
 def extract_info(url, course_regex):
     """
-    Enter your docstring here.
+    Return college and equivalent course found in the given url if any
+    :param url: (string) given url to get information from
+    :param course_regex: (string) given regex to find matched info
+    :return: (string) college name and equivalent courses or None
     """
     # Return college and equivalent course found in the given url if any
     soup = make_soup(url)
@@ -54,7 +60,10 @@ def extract_info(url, course_regex):
 
 def harvest(all_links, course_regex):
     """
-    Enter your docstring here.
+    Get the equivalency info for each link in all links
+    :param all_links: (list) list of links
+    :param course_regex: (string) regex that defines course patterns
+    :return: (string) all equivalent courses correspond to course_regex
     """
     # Invoke extract_url to get the equivalency info for each link in
     # all_links.
@@ -71,7 +80,10 @@ def harvest(all_links, course_regex):
 
 def report(info, course_name):
     """
-    Enter your docstring here.
+    Write the info harvested to a text file with course_name as its name
+    :param info: (string) information harvested
+    :param course_name: (string) name entered by user
+    :return: None
     """
     # Write the info harvested to a text file with the name:
     # course_name.txt where course_name is the name as entered by user.
@@ -86,8 +98,9 @@ def report(info, course_name):
 
 def make_soup(url):
     """
-    :param url:
-    :return:
+    Parse the html file specified.
+    :param url: (string) url link to be parsed
+    :return: BeautifulSoup object
     """
     try:
         with urllib.request.urlopen(url) as url_file:
