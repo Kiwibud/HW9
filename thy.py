@@ -103,9 +103,10 @@ def course_variation(course_name):
     """
     Formalize a regex to fix all the variations from user's input
     :param course_name: name of course
-    :return: Formalized course_regex to find the course info
+    :return: course_regex compatible with SJSU courses' info
     """
-    pattern = r'([A-Za-z]+[0-9]?)(\s*)(\d+)(\s*)([A-Za-z]?)'
+    pattern = r'([A-Za-z]+[0-9]?)(\s)(\d+)(\s*)([A-Za-z]?)|' \
+              r'([A-Za-z]+)(\s*)(\d+)(\s*)([A-Za-z]?)'
     course_match = re.finditer(pattern, course_name, re.IGNORECASE)
     if not course_match:
         print("Course name does not match the pattern")
